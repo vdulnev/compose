@@ -75,6 +75,8 @@ fun StateScreen(navController: NavController) {
             DerivedStateSection()
             HorizontalDivider()
             MutationPolicySection()
+            HorizontalDivider()
+            SelectiveRecompositionSection()
             Spacer(Modifier.height(16.dp))
         }
     }
@@ -256,6 +258,86 @@ private fun MutationPolicySection() {
 private fun RawTempText(rawTemperature: () -> Float) {
     Text(
         "Raw Temp: ${"%.1f".format(rawTemperature())}°",
+        style = MaterialTheme.typography.bodyMedium,
+    )
+}
+
+// --- Selective Recomposition: single data class, lambdas pick slices ---
+
+private data class PlayerState(
+    val name: String = "Alice",
+    val score: Int = 0,
+    val level: Int = 1,
+)
+
+@Composable
+private fun SelectiveRecompositionSection() {
+    // Single data class state — avoid reading .value in this composable's
+    // composition scope so the parent does NOT subscribe to changes.
+    val playerState = remember { mutableStateOf(PlayerState()) }
+
+    // derivedStateOf picks one field each — the derived state only
+    // notifies when that specific field actually changes.
+    val name by remember { derivedStateOf { playerState.value.name } }
+    val score by remember { derivedStateOf { playerState.value.score } }
+    val level by remember { derivedStateOf { playerState.value.level } }
+
+    val sectionRecompositions = remember { intArrayOf(0) }
+
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            "Selective recomposition — single data class",
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Text(
+            "State is one PlayerState data class. derivedStateOf picks " +
+                "each field, so only the affected row recomposes.",
+            style = MaterialTheme.typography.bodySmall,
+        )
+
+        SideEffect { sectionRecompositions[0]++ }
+        Text(
+            "Section recompositions: ${sectionRecompositions[0]}",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.outline,
+        )
+
+        StateSliceRow(label = "Name", value = { name })
+        StateSliceRow(label = "Score", value = { score.toString() })
+        StateSliceRow(label = "Level", value = { level.toString() })
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = {
+                val current = playerState.value
+                playerState.value = current.copy(
+                    name = if (current.name == "Alice") "Bob" else "Alice",
+                )
+            }) {
+                Text("Toggle name")
+            }
+            Button(onClick = {
+                val current = playerState.value
+                playerState.value = current.copy(score = current.score + 10)
+            }) {
+                Text("+10 score")
+            }
+            Button(onClick = {
+                val current = playerState.value
+                playerState.value = current.copy(level = current.level + 1)
+            }) {
+                Text("Level up")
+            }
+        }
+    }
+}
+
+@Composable
+private fun StateSliceRow(label: String, value: () -> String) {
+    val recompositions = remember { intArrayOf(0) }
+    SideEffect { recompositions[0]++ }
+    Text(
+        "$label: ${value()}  (recompositions: ${recompositions[0]})",
         style = MaterialTheme.typography.bodyMedium,
     )
 }
