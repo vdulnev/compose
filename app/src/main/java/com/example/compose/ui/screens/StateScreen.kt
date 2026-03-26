@@ -292,7 +292,7 @@ private fun SelectiveRecompositionSection() {
         )
         Text(
             "State is one PlayerState data class. derivedStateOf picks " +
-                "each field, so only the affected row recomposes.",
+                    "each field, so only the affected row recomposes.",
             style = MaterialTheme.typography.bodySmall,
         )
 
@@ -303,9 +303,9 @@ private fun SelectiveRecompositionSection() {
             color = MaterialTheme.colorScheme.outline,
         )
 
-        StateSliceRow(label = "Name", value = { name })
-        StateSliceRow(label = "Score", value = { score.toString() })
-        StateSliceRow(label = "Level", value = { level.toString() })
+        StateSliceRow(label = "Name", value = name)
+        StateSliceRow(label = "Score", value = score.toString())
+        StateSliceRow(label = "Level", value = level.toString())
 
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = {
@@ -333,11 +333,11 @@ private fun SelectiveRecompositionSection() {
 }
 
 @Composable
-private fun StateSliceRow(label: String, value: () -> String) {
+private fun StateSliceRow(label: String, value: String) {
     val recompositions = remember { intArrayOf(0) }
     SideEffect { recompositions[0]++ }
     Text(
-        "$label: ${value()}  (recompositions: ${recompositions[0]})",
+        "$label: $value  (recompositions: ${recompositions[0]})",
         style = MaterialTheme.typography.bodyMedium,
     )
 }
