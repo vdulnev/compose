@@ -14,6 +14,7 @@ import com.example.compose.ui.screens.LazyListScreen
 import com.example.compose.ui.screens.LayoutsScreen
 import com.example.compose.ui.screens.MaterialComponentsScreen
 import com.example.compose.ui.screens.SideEffectsScreen
+import com.example.compose.ui.screens.ScrollEffectsScreen
 import com.example.compose.ui.screens.ShaderScreen
 import com.example.compose.ui.screens.StateScreen
 
@@ -30,6 +31,7 @@ object Routes {
     const val CUPERTINO = "cupertino"
     const val ADVANCED_MATERIAL = "advanced_material"
     const val SHADERS = "shaders"
+    const val SCROLL_EFFECTS = "scroll_effects"
 }
 
 @Composable
@@ -48,5 +50,6 @@ fun AppNavGraph() {
         composable(Routes.CUPERTINO) { CupertinoStyleScreen(navController) }
         composable(Routes.ADVANCED_MATERIAL) { AdvancedMaterialScreen(navController) }
         composable(Routes.SHADERS) { ShaderScreen(navController) }
+        composable(Routes.SCROLL_EFFECTS) { ScrollEffectsScreen(navController) }
     }
 }
