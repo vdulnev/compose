@@ -43,6 +43,7 @@ private val features = listOf(
     Feature("Side Effects", "LaunchedEffect · coroutines", Routes.SIDE_EFFECTS, Color(0xFF5D4037)),
     Feature("Cupertino Style", "iOS toggle · segmented · list", Routes.CUPERTINO, Color(0xFF607D8B)),
     Feature("Advanced M3", "Tabs · Sheet · Dialog · FAB", Routes.ADVANCED_MATERIAL, Color(0xFFC2185B)),
+    Feature("Shaders", "Aurora · Liquid · Voronoi", Routes.SHADERS, Color(0xFF1A237E)),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

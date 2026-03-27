@@ -14,6 +14,7 @@ import com.example.compose.ui.screens.LazyListScreen
 import com.example.compose.ui.screens.LayoutsScreen
 import com.example.compose.ui.screens.MaterialComponentsScreen
 import com.example.compose.ui.screens.SideEffectsScreen
+import com.example.compose.ui.screens.ShaderScreen
 import com.example.compose.ui.screens.StateScreen
 
 object Routes {
@@ -28,6 +29,7 @@ object Routes {
     const val SIDE_EFFECTS = "side_effects"
     const val CUPERTINO = "cupertino"
     const val ADVANCED_MATERIAL = "advanced_material"
+    const val SHADERS = "shaders"
 }
 
 @Composable
@@ -45,5 +47,6 @@ fun AppNavGraph() {
         composable(Routes.SIDE_EFFECTS) { SideEffectsScreen(navController) }
         composable(Routes.CUPERTINO) { CupertinoStyleScreen(navController) }
         composable(Routes.ADVANCED_MATERIAL) { AdvancedMaterialScreen(navController) }
+        composable(Routes.SHADERS) { ShaderScreen(navController) }
     }
 }
