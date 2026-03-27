@@ -3,7 +3,7 @@ package com.example.compose.ui.screens
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -42,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
@@ -117,58 +119,60 @@ fun LazyListScreen(navController: NavController) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .animateItem()
+                        .zIndex(if (dragIndex == index) 1f else 0f)
                         .offset {
                             if (dragIndex == index) IntOffset(
                                 0,
                                 dragOffsetY.toInt()
                             ) else IntOffset(0, 0)
-                        }
-                        .pointerInput(index) {
-                            detectDragGestures(
-                                onDragStart = {
-                                    dragIndex = index
-                                },
-                                onDragEnd = {
-                                    dragOffsetY = 0f
-                                    dragIndex = -1
-                                },
-                                onDragCancel = {
-                                    dragOffsetY = 0f
-                                    dragIndex = -1
-                                },
-                                onDrag = { _, dragAmount ->
-                                    dragOffsetY += dragAmount.y
-
-                                    // Calculate which item we're moving towards
-                                    val density = density
-                                    val itemHeight =
-                                        with(density) { 100.dp.toPx() } // Approximate card height + spacing
-
-                                    // Determine how many items we've moved past
-                                    val deltaItems = (dragOffsetY / itemHeight).toInt()
-
-                                    if (deltaItems != 0 && dragIndex != -1) {
-                                        val newDragIndex = dragIndex + deltaItems
-                                        if (newDragIndex in 0 until items.size) {
-                                            // Move the dragged item to the new position
-                                            val draggedItem = items.removeAt(dragIndex)
-                                            items.add(newDragIndex, draggedItem)
-
-                                            // Update drag index to track the dragged item
-                                            dragIndex = newDragIndex
-                                            dragOffsetY = 0f // Reset offset after move
-                                        }
-                                    }
-                                },
-                            )
                         },
                     onClick = {},
                 ) {
                     Row(
-                        modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 12.dp),
+                        modifier = Modifier.padding(top = 12.dp, bottom = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
+                        Icon(
+                            Icons.Default.Menu,
+                            contentDescription = "Drag to reorder",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier
+                                .padding(start = 12.dp)
+                                .pointerInput(item.id) {
+                                    detectDragGesturesAfterLongPress(
+                                        onDragStart = {
+                                            dragIndex = index
+                                        },
+                                        onDragEnd = {
+                                            dragOffsetY = 0f
+                                            dragIndex = -1
+                                        },
+                                        onDragCancel = {
+                                            dragOffsetY = 0f
+                                            dragIndex = -1
+                                        },
+                                        onDrag = { _, dragAmount ->
+                                            dragOffsetY += dragAmount.y
+
+                                            val itemHeight =
+                                                with(density) { 100.dp.toPx() }
+
+                                            val deltaItems = (dragOffsetY / itemHeight).toInt()
+
+                                            if (deltaItems != 0 && dragIndex != -1) {
+                                                val newDragIndex = dragIndex + deltaItems
+                                                if (newDragIndex in 0 until items.size) {
+                                                    val draggedItem = items.removeAt(dragIndex)
+                                                    items.add(newDragIndex, draggedItem)
+                                                    dragIndex = newDragIndex
+                                                    dragOffsetY = 0f
+                                                }
+                                            }
+                                        },
+                                    )
+                                },
+                        )
+                        Column(modifier = Modifier.weight(1f).padding(start = 12.dp)) {
                             Text(item.title, style = MaterialTheme.typography.titleSmall)
                             Text(item.body, style = MaterialTheme.typography.bodySmall)
                         }
