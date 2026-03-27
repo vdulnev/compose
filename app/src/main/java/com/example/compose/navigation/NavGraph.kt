@@ -4,8 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.compose.ui.screens.AdvancedMaterialScreen
 import com.example.compose.ui.screens.AnimationScreen
 import com.example.compose.ui.screens.CanvasScreen
+import com.example.compose.ui.screens.CupertinoStyleScreen
 import com.example.compose.ui.screens.GesturesScreen
 import com.example.compose.ui.screens.HomeScreen
 import com.example.compose.ui.screens.LazyListScreen
@@ -24,6 +26,8 @@ object Routes {
     const val GESTURES = "gestures"
     const val CANVAS = "canvas"
     const val SIDE_EFFECTS = "side_effects"
+    const val CUPERTINO = "cupertino"
+    const val ADVANCED_MATERIAL = "advanced_material"
 }
 
 @Composable
@@ -39,5 +43,7 @@ fun AppNavGraph() {
         composable(Routes.GESTURES) { GesturesScreen(navController) }
         composable(Routes.CANVAS) { CanvasScreen(navController) }
         composable(Routes.SIDE_EFFECTS) { SideEffectsScreen(navController) }
+        composable(Routes.CUPERTINO) { CupertinoStyleScreen(navController) }
+        composable(Routes.ADVANCED_MATERIAL) { AdvancedMaterialScreen(navController) }
     }
 }

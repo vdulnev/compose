@@ -3,6 +3,7 @@ package com.example.compose.ui.screens
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -29,13 +31,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
@@ -52,9 +58,14 @@ private fun sampleItem(id: Int) = ListItem(
 @Composable
 fun LazyListScreen(navController: NavController) {
     val items = remember { mutableStateListOf(*Array(12) { sampleItem(it + 1) }) }
-    var nextId by remember { mutableStateOf(items.size + 1) }
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
+
+    // State for drag and drop reordering
+    var dragIndex by remember { mutableIntStateOf(-1) }
+    var dragOffsetY by remember { mutableFloatStateOf(0f) }
+
+    val density = LocalDensity.current
 
     Scaffold(
         topBar = {
@@ -69,7 +80,7 @@ fun LazyListScreen(navController: NavController) {
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                items.add(0, sampleItem(nextId++))
+                items.add(0, sampleItem(items.size + 1))
                 scope.launch { listState.animateScrollToItem(0) }
             }) {
                 Icon(Icons.Default.Add, contentDescription = "Add item")
@@ -94,18 +105,64 @@ fun LazyListScreen(navController: NavController) {
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                 ) {
                     Text(
-                        "${items.size} items — tap + to add, trash to remove",
+                        "${items.size} items — tap + to add, trash to remove, long-press & drag to reorder",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                 }
             }
 
-            itemsIndexed(items = items, key = { _, item -> item.id }) { _, item ->
+            itemsIndexed(items = items, key = { _, item -> item.id }) { index, item ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .animateItem(),
+                        .animateItem()
+                        .offset {
+                            if (dragIndex == index) IntOffset(
+                                0,
+                                dragOffsetY.toInt()
+                            ) else IntOffset(0, 0)
+                        }
+                        .pointerInput(index) {
+                            detectDragGestures(
+                                onDragStart = {
+                                    dragIndex = index
+                                },
+                                onDragEnd = {
+                                    dragOffsetY = 0f
+                                    dragIndex = -1
+                                },
+                                onDragCancel = {
+                                    dragOffsetY = 0f
+                                    dragIndex = -1
+                                },
+                                onDrag = { _, dragAmount ->
+                                    dragOffsetY += dragAmount.y
+
+                                    // Calculate which item we're moving towards
+                                    val density = density
+                                    val itemHeight =
+                                        with(density) { 100.dp.toPx() } // Approximate card height + spacing
+
+                                    // Determine how many items we've moved past
+                                    val deltaItems = (dragOffsetY / itemHeight).toInt()
+
+                                    if (deltaItems != 0 && dragIndex != -1) {
+                                        val newDragIndex = dragIndex + deltaItems
+                                        if (newDragIndex in 0 until items.size) {
+                                            // Move the dragged item to the new position
+                                            val draggedItem = items.removeAt(dragIndex)
+                                            items.add(newDragIndex, draggedItem)
+
+                                            // Update drag index to track the dragged item
+                                            dragIndex = newDragIndex
+                                            dragOffsetY = 0f // Reset offset after move
+                                        }
+                                    }
+                                },
+                            )
+                        },
+                    onClick = {},
                 ) {
                     Row(
                         modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 12.dp),

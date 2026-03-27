@@ -41,6 +41,8 @@ private val features = listOf(
     Feature("Gestures", "drag · long press · pointer", Routes.GESTURES, Color(0xFFF57F17)),
     Feature("Canvas", "shapes · paths · custom UI", Routes.CANVAS, Color(0xFF7B1FA2)),
     Feature("Side Effects", "LaunchedEffect · coroutines", Routes.SIDE_EFFECTS, Color(0xFF5D4037)),
+    Feature("Cupertino Style", "iOS toggle · segmented · list", Routes.CUPERTINO, Color(0xFF607D8B)),
+    Feature("Advanced M3", "Tabs · Sheet · Dialog · FAB", Routes.ADVANCED_MATERIAL, Color(0xFFC2185B)),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
